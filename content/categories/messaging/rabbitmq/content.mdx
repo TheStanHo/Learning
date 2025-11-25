@@ -1,0 +1,290 @@
+---
+title: "RabbitMQ"
+description: "Learn about RabbitMQ message broker, queues, and messaging patterns"
+category: "messaging"
+topic: "rabbitmq"
+tags: ["rabbitmq", "messaging", "queues", "message broker", "amqp"]
+type: "text"
+createdAt: "2024-01-01"
+updatedAt: "2024-01-01"
+---
+
+# RabbitMQ
+
+RabbitMQ is an open-source message broker that implements the Advanced Message Queuing Protocol (AMQP). It enables asynchronous communication between services.
+
+<VideoPlayer src="/media/messaging/rabbitmq/RabbitMq.mp4" title="RabbitMQ Introduction" />
+
+![RabbitMQ Infographic](/media/messaging/rabbitmq/RabbitMq-Infographic.png)
+
+## What is RabbitMQ?
+
+RabbitMQ is a message broker that:
+
+- **Decouples Services**: Services communicate through messages, not direct calls
+- **Handles Queues**: Manages message queues and routing
+- **Ensures Delivery**: Provides message acknowledgments and persistence
+- **Scales Horizontally**: Can be clustered for high availability
+- **Supports Multiple Protocols**: AMQP, MQTT, STOMP, WebSockets
+
+## Fundamentals of Message Queues
+
+Message Queuing allows applications to communicate by sending messages to each other. They serve as critical communication channels in distributed systems, mediating between producers and consumers. The core purpose of message queues is to support **asynchronous communication**, workload distribution, and system separation. A message queue provides temporary storage for messages until the receiving service is available to process them.
+
+### Key Components
+
+1. **Producers (Publishers)**: Services or applications that create messages (which often contain requests, events, or data payloads) and deliver them to the message queue. Producers send messages without waiting for consumer processing.
+
+2. **Message Brokers**: Functioning as middleware, the broker (such as RabbitMQ) oversees message storage, direction, and delivery, ensuring efficient message transfer. The broker receives messages from publishers and routes them to consumers.
+
+3. **Queues**: The storage space that temporarily or permanently holds messages until they are consumed. Queues can be durable (metadata stored on disk) or transient (metadata stored in memory). A queue is essentially a large message buffer, limited only by the host's memory and disk limits.
+
+4. **Consumers**: Applications or services that receive and process messages from the queue. Consumers can retrieve messages either by polling ("pull API," which is highly inefficient and should generally be avoided) or by subscribing to have messages delivered to them ("push API," which is the recommended option).
+
+### Benefits
+
+Message queues offer significant advantages, including **decoupling services**, allowing senders and receivers to operate independently. This loose coupling boosts **scalability** by allowing new consumers to be added dynamically for parallel processing, and enhances **fault tolerance** by preventing message loss during system crashes.
+
+## The AMQP 0-9-1 Model
+
+RabbitMQ supports the **AMQP 0-9-1 (Advanced Message Queuing Protocol)**, which governs how clients communicate with the messaging broker. The AMQP 0-9-1 Model is built on three key AMQP entities: exchanges, queues, and bindings.
+
+### Exchanges
+
+Exchanges receive messages and route them to queues based on rules. Messages are published to exchanges, similar to a post office or mailbox. Exchanges are responsible for taking a message and routing it to zero or more queues based on the exchange type and rules called bindings.
+
+**Exchange Types:**
+
+1. **Direct Exchange**: Delivers messages to queues where the queue's binding key *exactly matches* the message's routing key. It is ideal for unicast routing. The broker pre-declares a default exchange (empty string) that acts as a direct exchange.
+
+2. **Fanout Exchange**: Routes message copies to *all* queues bound to it, ignoring the routing key. It is ideal for broadcast routing, such as distributing score updates or state changes to many listeners.
+
+3. **Topic Exchange**: Routes messages based on matching patterns (using wildcards like `*` for one word or `#` for zero or more words) between the message routing key and the queue's binding pattern. This is often used to implement publish/subscribe patterns and multicast routing.
+
+4. **Headers Exchange**: Routes messages based on multiple message headers (attributes) rather than the routing key. A binding argument called `"x-match"` specifies whether *any* or *all* matching headers are required for routing.
+
+### Queues
+
+Queues store messages until they're consumed:
+
+```python
+# Create a queue
+channel.queue_declare(queue='task_queue', durable=True)
+```
+
+### Bindings
+
+Bindings are the rules that link a queue to an exchange. Bindings may have an optional **routing key** attribute which acts like a filter to select certain messages published to the exchange. If a message cannot be routed to any queue (e.g., no bindings exist), it is either dropped or returned to the publisher.
+
+```python
+# Bind queue to exchange
+channel.queue_bind(
+    exchange='logs',
+    queue='log_queue',
+    routing_key='error'
+)
+```
+
+**AMQP as a Programmable Protocol**: AMQP entities and routing schemes are primarily defined by the applications themselves, rather than a broker administrator. Applications use protocol operations like `exchange.declare` and `queue.declare` to define the necessary entities.
+
+## Common Patterns
+
+### 1. Work Queue (Task Queue)
+
+Distribute time-consuming tasks among workers:
+
+```python
+# Producer
+channel.basic_publish(
+    exchange='',
+    routing_key='task_queue',
+    body=message,
+    properties=pika.BasicProperties(delivery_mode=2)  # Make message persistent
+)
+
+# Consumer
+def callback(ch, method, properties, body):
+    # Process the message
+    process_message(body)
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+```
+
+### 2. Pub/Sub (Publish/Subscribe)
+
+Broadcast messages to multiple consumers:
+
+```python
+# Producer publishes to exchange
+channel.basic_publish(
+    exchange='logs',
+    routing_key='',
+    body=message
+)
+
+# Multiple consumers receive the message
+```
+
+### 3. Routing
+
+Route messages selectively based on routing keys:
+
+```python
+# Producer
+channel.basic_publish(
+    exchange='direct_logs',
+    routing_key='error',  # or 'warning', 'info'
+    body=message
+)
+```
+
+### 4. Topics
+
+Route messages based on pattern matching:
+
+```python
+# Routing keys: "stock.usd.nyse", "stock.eur.nasdaq"
+channel.basic_publish(
+    exchange='topic_logs',
+    routing_key='stock.usd.nyse',
+    body=message
+)
+```
+
+## Message Properties
+
+### Durability
+
+```python
+# Make queue durable
+channel.queue_declare(queue='task_queue', durable=True)
+
+# Make message persistent
+properties=pika.BasicProperties(
+    delivery_mode=2,  # 2 = persistent
+)
+```
+
+### Acknowledgments
+
+Since messaging systems are distributed and prone to failures, reliability features like acknowledgements and publisher confirms are essential for data safety.
+
+**Consumer Acknowledgements (Delivery Reliability):**
+
+- The model uses **message acknowledgements** to ensure messages are processed. A broker will only remove a message from a queue when it receives a notification that the consumer has successfully received and processed it.
+- **Automatic Acknowledgement Mode** means the message is considered delivered immediately after the broker sends it. This is considered unsafe as messages can be lost if the consumer's connection closes before processing.
+- **Explicit/Manual Acknowledgement Mode** requires the application to send an acknowledgement (`basic.ack`) after processing is complete. If a consumer dies without acknowledging a delivery, the broker will automatically redeliver the message to another consumer.
+
+```python
+# Manual acknowledgment
+channel.basic_ack(delivery_tag=method.delivery_tag)
+
+# Reject and requeue
+channel.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+
+# Reject message (RabbitMQ extension)
+channel.basic_reject(delivery_tag=method.delivery_tag, requeue=False)
+```
+
+- Consumers can indicate failed processing by **rejecting messages** using `basic.reject` or the RabbitMQ extension `basic.nack`. Rejected messages can be discarded, **requeued** (placed back into the queue for redelivery), or routed to a **Dead Letter Exchange (DLX)**/Dead Letter Queue (DLQ).
+- **Prefetching Messages (QoS)**: This setting limits the maximum number of unacknowledged deliveries permitted on a channel. Setting a prefetch count prevents consumers from being overwhelmed by delivery rates, thereby avoiding unbounded memory usage. Values between 100 and 300 usually offer optimal throughput.
+
+```python
+# Set prefetch count
+channel.basic_qos(prefetch_count=100)
+```
+
+**Publisher Confirms (Publishing Reliability):**
+
+- **Publisher Confirms** are a protocol extension that allows publishers to guarantee a message reached the broker and was processed.
+- Once a channel is in confirm mode, the broker confirms messages by sending a `basic.ack` to the publisher. For persistent messages routed to durable queues, this confirmation means the message has been **persisted to disk**.
+- If the broker cannot handle the message, it sends a `basic.nack`. If a publisher fails to receive an acknowledgment for a persistent message before a node failure, the message may be lost, underscoring the need for confirms to guarantee persistence.
+
+```python
+# Enable publisher confirms
+channel.confirm_delivery()
+
+# Publish with confirmation
+if channel.basic_publish(
+    exchange='',
+    routing_key='task_queue',
+    body=message,
+    properties=pika.BasicProperties(delivery_mode=2)
+):
+    print("Message confirmed")
+else:
+    print("Message not confirmed")
+```
+
+## Common Challenges
+
+While essential for distributed systems, message queues present operational challenges:
+
+### Message Duplication
+
+This occurs when a consumer fails to acknowledge a message due to network issues or timeouts, prompting the queue to redeliver the message, which can lead to unintended side effects (e.g., charging a customer twice). The primary solution is implementing **idempotency** in consumers so they can safely process the same message multiple times.
+
+### Dead-Letter Messages (DLQ)
+
+Messages that cannot be processed due to errors (e.g., corrupted data) may be moved to a DLQ after multiple retries. If the DLQ is not monitored, the data can be lost.
+
+```python
+# Configure dead letter exchange
+channel.queue_declare(
+    queue='task_queue',
+    durable=True,
+    arguments={
+        'x-dead-letter-exchange': 'dlx',
+        'x-dead-letter-routing-key': 'failed'
+    }
+)
+```
+
+### Queue Overload
+
+A high volume of messages or slow consumer processing can cause the queue to reach capacity, resulting in slower processing, resource consumption, or dropped events. Solutions include scaling consumers and implementing backpressure or rate-limiting.
+
+### Message Ordering Issues
+
+Message queues do not always guarantee strict order across multiple consumers, which can be problematic for transactional systems where order consistency is crucial (e.g., inventory must be reserved before an order is confirmed). Solutions involve routing related messages to the same consumer or detecting out-of-order messages using timestamps.
+
+## Best Practices
+
+1. **Use Persistent Messages**: For critical messages
+2. **Acknowledge Messages**: After successful processing
+3. **Handle Errors**: Implement dead letter queues
+4. **Monitor Queues**: Watch queue lengths and consumer counts
+5. **Use Connection Pooling**: Reuse connections
+6. **Implement Retry Logic**: For transient failures
+7. **Set TTL**: For time-sensitive messages
+8. **Implement Idempotency**: Handle duplicate messages safely
+9. **Set Appropriate Prefetch Count**: Between 100-300 for optimal throughput
+10. **Use Publisher Confirms**: For guaranteed message persistence
+
+## Installation & Setup
+
+### Using Docker
+
+```bash
+docker run -d --name rabbitmq \
+  -p 5672:5672 \
+  -p 15672:15672 \
+  rabbitmq:3-management
+```
+
+### Management UI
+
+Access the management UI at `http://localhost:15672`
+- Default username: `guest`
+- Default password: `guest`
+
+## Summary
+
+Message queuing acts like a reliable mail delivery system in a decentralized city. While standard mailboxes (queues) store letters until delivery, the post office (broker) uses different routing rules (exchanges and bindings) to ensure the message gets to the correct destination. Reliability is built-in: just as a delivery requires a signature (acknowledgement) before the mail carrier discards the tracking slip, RabbitMQ requires consumer acknowledgment before deleting the message, ensuring data safety even if the consumer temporarily fails.
+
+## Resources
+
+- [Official RabbitMQ documentation](https://www.rabbitmq.com/documentation.html)
+- [AMQP protocol specification](https://www.rabbitmq.com/amqp-0-9-1-reference.html)
+- Message queue patterns
+- RabbitMQ tutorials
+

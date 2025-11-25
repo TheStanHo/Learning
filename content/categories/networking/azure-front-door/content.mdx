@@ -1,0 +1,125 @@
+---
+title: "Azure Front Door"
+description: "Learn about Azure Front Door, Microsoft's global CDN and secure entry point for web applications with advanced security, performance optimization, and traffic management"
+category: "networking"
+topic: "azure-front-door"
+tags: ["azure", "front-door", "cdn", "networking", "security", "waf", "ddos-protection", "load-balancing", "cloud"]
+type: "text"
+createdAt: "2024-11-25"
+updatedAt: "2024-11-25"
+---
+
+# Azure Front Door
+
+**Azure Front Door (AFD)** is a robust, global, and centralized networking solution offered by Microsoft Azure, designed to accelerate content delivery, manage traffic, and provide enhanced security for web applications, APIs, and websites worldwide. It acts as Microsoft's advanced cloud Content Delivery Network (CDN) and a scalable entry point for internet-facing applications.
+
+Azure Front Door is a secure cloud CDN service that combines the functionalities of traditional Content Delivery Networks (CDN), global load balancing, dynamic site acceleration, and enhanced security, including Azure Web Application Firewall (WAF) and DDoS protection.
+
+By utilizing **Microsoft's extensive global edge network**, Azure Front Door ensures efficient content delivery through over 118 edge locations across 100 metro cities, strategically positioned close to end users.
+
+<VideoPlayer src="/media/networking/azure-front-door/Demystifying_Azure_Front_Door.mp4" title="Demystifying Azure Front Door" />
+
+![Azure Front Door Infographic](/media/networking/azure-front-door/Azure%20Front%20Door%20Infographic.png)
+
+## Key Benefits and Capabilities
+
+Azure Front Door is designed to build and operate modern internet-first architectures, providing dynamic, high-quality digital experiences.
+
+### 1. Global Performance and Availability
+
+- **Global Delivery Scale:** AFD uses Microsoft's global Cloud CDN and Wide Area Network (WAN) to scale out applications and content.
+- **Reduced Latency:** Application performance can be accelerated by using AFD's **anycast network** and **split TCP connections**, potentially improving latency by up to three times.
+- **Global Load Balancing and Failover:** AFD provides global load balancing, distributing traffic among multiple Azure regions, and features **automatic failover** to route traffic away from unhealthy regions or servers to enhance availability.
+- **Customizable Routing:** Implement advanced routing capabilities with a fully customizable rules engine, allowing for tailored traffic management.
+
+### 2. Security and Protection
+
+- **Intelligent Secure Perimeter:** AFD helps secure your digital estate against known and new threats, embracing a *Zero Trust* framework.
+- **DDoS Protection:** AFD includes **built-in Layer 3-4 DDoS protection** at the platform level.
+- **Web Application Firewall (WAF):** WAF is seamlessly attached to AFD to protect applications against **Layer 7 DDoS attacks** and common web vulnerabilities and exploits. WAF uses managed rule sets based on the OWASP top-10 attack types and Microsoft Threat Intelligence.
+- **Bot Management:** Advanced bot protection capabilities to identify and mitigate automated threats.
+- **Private Link Support (Premium):** This feature allows secure, private connections between Azure Front Door and your backend origins, preventing traffic from traversing the public internet.
+- **TLS/SSL Management:** AFD supports **SSL/TLS offload at the edge** and offers **free, auto-rotation managed SSL certificates** to quickly secure apps and content. It automatically encrypts all data in transit using TLS.
+
+### 3. Content Acceleration and Caching
+
+- **Content Caching:** AFD functions as a modern CDN, caching content at edge locations to significantly decrease latency and reduce the load on origin servers.
+- **Static and Dynamic Content Delivery:** AFD provides unified delivery for both static and dynamic content.
+- **Large File Delivery:** AFD handles large files without a size cap using **object chunking**. Files are retrieved from the origin in 8 MB chunks, cached, and immediately served to the user.
+- **Query String Control:** You can define how the cache handles query strings by choosing to **ignore** them, **use** them (treating unique query strings as unique assets), or specifying which parameters to **include or exclude** when generating the cache key.
+- **Cache Management:** The cache can be manually cleared using **cache purge** for single paths, wildcards, or the root domain to ensure users obtain the latest assets.
+
+### 4. DevOps Integration
+
+- **Cloud-Native Tools:** Streamline deployment and management processes with support for cloud-native and DevOps tools, including APIs, SDKs, and command-line interfaces.
+- **Azure Integration:** Seamless integration with other Azure services, such as Azure DNS and Azure Web Apps, simplifies the development and deployment of high-quality digital experiences.
+
+## Azure Front Door Tiers
+
+Azure Front Door pricing is available in two main tiers: Standard and Premium.
+
+| Feature | Azure Front Door Standard | Azure Front Door Premium |
+| :--- | :--- | :--- |
+| **Primary Focus** | Content delivery optimized | Content delivery plus extensive security |
+| **Key Capabilities** | Static and dynamic content acceleration, global load balancing, SSL offload, basic security. | Builds on Standard, adding advanced security capabilities. |
+| **Advanced Security** | Supports **Custom WAF rules** only. | Full WAF capabilities, including **Bot Protection**, **Private Link support**, and integration with **Microsoft Threat Intelligence**. |
+| **Base Fee (Monthly Estimate)** | $35 | $330 (WAF and Private Link pricing included) |
+
+### Billing Dimensions
+
+Billing is calculated based on several dimensions:
+
+- **Base Fees:** A fixed hourly charge
+- **Outbound Data Transfer from Edge to the Client:** Data transferred from edge locations to end users
+- **Outbound Data Transfer from Edge to the Origin:** Data transferred from edge locations to origin servers
+- **Requests:** Incoming requests from clients to Front Door's edge location
+
+**Important Note:** Data transfer from an origin in an Azure data center to Front Door's edge location is **free**.
+
+## Use Cases
+
+Azure Front Door is ideal for:
+
+- **Global Web Applications:** Deliver content to users worldwide with low latency
+- **API Management:** Accelerate and secure API endpoints globally
+- **E-commerce Platforms:** Ensure fast, secure, and reliable shopping experiences
+- **Media Streaming:** Deliver large media files efficiently using object chunking
+- **Multi-Region Applications:** Distribute traffic across multiple Azure regions with automatic failover
+- **Security-Critical Applications:** Protect against DDoS attacks and web vulnerabilities with integrated WAF
+
+## Understanding Azure Front Door: An Analogy
+
+Azure Front Door operates much like a **Global Concierge Service** for a large international corporation's online presence.
+
+Instead of every client having to call the main headquarters (the origin server) located across the ocean, they call the closest regional office (the edge location/PoP). This office immediately gives them standardized, highly requested information (cached static content) or quickly reroutes their complex inquiries (dynamic site traffic) to the correct department head at headquarters.
+
+Crucially, this concierge service is equipped with advanced security guards (WAF and DDoS protection) who screen every caller globally before they can even reach the local office, ensuring that malicious traffic is blocked far away from the valuable resources inside.
+
+## Getting Started
+
+To get started with Azure Front Door:
+
+1. **Create a Front Door Profile:** Set up your Azure Front Door profile in the Azure Portal
+2. **Configure Backend Pools:** Define your origin servers or backend services
+3. **Set Up Routing Rules:** Configure routing rules to direct traffic to appropriate backends
+4. **Enable Security Features:** Configure WAF policies and DDoS protection settings
+5. **Optimize Caching:** Configure cache rules for static and dynamic content
+6. **Monitor Performance:** Use Azure Monitor and Front Door analytics to track performance and security metrics
+
+## Integration with Azure Services
+
+Azure Front Door integrates seamlessly with:
+
+- **Azure Web Apps:** Direct integration for Azure-hosted web applications
+- **Azure DNS:** Simplified DNS management for custom domains
+- **Azure Key Vault:** Secure certificate management
+- **Azure Monitor:** Comprehensive monitoring and alerting
+- **Azure Application Insights:** Application performance monitoring
+
+## Resources
+
+- [Azure Front Door Official Documentation](https://learn.microsoft.com/en-us/azure/frontdoor/)
+- [Azure Front Door Pricing](https://azure.microsoft.com/en-us/pricing/details/frontdoor/)
+- [Azure Front Door Service Overview](https://azure.microsoft.com/en-us/products/frontdoor)
+- [Web Application Firewall Documentation](https://learn.microsoft.com/en-us/azure/web-application-firewall/)
+

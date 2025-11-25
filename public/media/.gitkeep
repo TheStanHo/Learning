@@ -1,0 +1,4 @@
+# Media files organized by category and topic
+# Structure: /media/[category]/[topic]/filename.mp4
+# Example: /media/messaging/rabbitmq/video.mp4
+
