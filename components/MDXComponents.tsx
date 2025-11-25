@@ -124,9 +124,12 @@ export const MDXComponents = {
   ),
   div: (props: MDXComponentProps) => {
     // Handle divs that might have white backgrounds - make them theme-aware
+    const backgroundStr = typeof props.style?.background === 'string' ? props.style.background : '';
+    const backgroundColorStr = typeof props.style?.backgroundColor === 'string' ? props.style.backgroundColor : '';
+    
     const hasWhiteBg = props.className?.includes('bg-white') || 
-                       props.style?.background?.includes('white') || 
-                       props.style?.backgroundColor?.includes('white') ||
+                       backgroundStr.includes('white') || 
+                       backgroundColorStr.includes('white') ||
                        props.style?.background === 'white' ||
                        props.style?.backgroundColor === 'white';
     
@@ -134,8 +137,12 @@ export const MDXComponents = {
       const { style, className, ...rest } = props;
       const newStyle = { ...style };
       // Remove white background from inline styles, let CSS handle it
-      if (newStyle.background?.includes('white')) delete newStyle.background;
-      if (newStyle.backgroundColor?.includes('white')) delete newStyle.backgroundColor;
+      if (typeof newStyle.background === 'string' && newStyle.background.includes('white')) {
+        delete newStyle.background;
+      }
+      if (typeof newStyle.backgroundColor === 'string' && newStyle.backgroundColor.includes('white')) {
+        delete newStyle.backgroundColor;
+      }
       if (newStyle.background === 'white') delete newStyle.background;
       if (newStyle.backgroundColor === 'white') delete newStyle.backgroundColor;
       

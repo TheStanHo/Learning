@@ -5,19 +5,22 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { getAllCategoriesWithTopics } from "@/lib/content";
 
 // Import version info - will be generated at build time
-let versionInfo: { version: string; commitHashShort: string; branch: string; buildDate: string } | null = null;
-try {
-  versionInfo = require("@/lib/version.json");
-} catch {
-  // Fallback if version.json doesn't exist yet (first run)
-  const packageJson = require("../package.json");
-  versionInfo = {
-    version: packageJson.version,
-    commitHashShort: "dev",
-    branch: "dev",
-    buildDate: new Date().toLocaleDateString(),
-  };
+function getVersionInfo(): { version: string; commitHashShort: string; branch: string; buildDate: string } {
+  try {
+    return require("@/lib/version.json");
+  } catch {
+    // Fallback if version.json doesn't exist yet (first run)
+    const packageJson = require("../package.json");
+    return {
+      version: packageJson.version,
+      commitHashShort: "dev",
+      branch: "dev",
+      buildDate: new Date().toLocaleDateString(),
+    };
+  }
 }
+
+const versionInfo = getVersionInfo();
 
 export const metadata: Metadata = {
   title: {
