@@ -81,16 +81,38 @@ export default function TableOfContents({ content }: TableOfContentsProps) {
 
   const scrollToHeading = (id: string) => {
     const element = document.getElementById(id);
-    if (element) {
-      const offset = 80; // Account for any fixed headers
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
+    if (!element) return;
+    
+    // Calculate offset - TOC is at top-24 (96px), so header is likely around that height
+    const header = document.querySelector('main[id="main-content"] > div.sticky.top-0') as HTMLElement;
+    const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 96;
+    // Use smaller padding - just enough to clear the header with some breathing room
+    const offset = headerHeight + 16;
+    
+    // Use offsetTop which is more reliable for absolute positioning
+    let elementTop = 0;
+    let currentElement: HTMLElement | null = element;
+    
+    while (currentElement) {
+      elementTop += currentElement.offsetTop;
+      currentElement = currentElement.offsetParent as HTMLElement | null;
     }
+    
+    // Calculate target position
+    const targetPosition = elementTop - offset;
+    
+    // Scroll to the calculated position
+    window.scrollTo({
+      top: Math.max(0, targetPosition),
+      behavior: 'smooth',
+    });
+    
+    // Update URL hash
+    setTimeout(() => {
+      if (window.location.hash !== `#${id}`) {
+        window.history.replaceState(null, '', `#${id}`);
+      }
+    }, 100);
   };
 
   return (
