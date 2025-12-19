@@ -17,6 +17,7 @@
 - [x] Create 404 pages
 - [x] Test categories generation script
 - [x] Set up Google Analytics with measurement ID G-QG8G2RH0YR
+- [x] Create Apache Kafka content page with video and infographic
 
 ## In Progress 🔄
 - None
