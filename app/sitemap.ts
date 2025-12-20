@@ -4,7 +4,7 @@ import { getAllTopics, getAllCategoriesWithTopics } from '@/lib/content';
 export const dynamic = 'force-static';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://learning-resources.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://learning.stanho.dev';
   
   const topics = await getAllTopics();
   const categories = await getAllCategoriesWithTopics();

@@ -84,7 +84,7 @@ export default async function TopicPage({ params }: PageProps) {
   const allTopics = await getAllTopics();
 
   // Prepare structured data
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://learning-resources.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://learning.stanho.dev';
   const breadcrumbItems = [
     { name: 'Home', url: '/' },
     { name: 'Topics', url: '/topics' },

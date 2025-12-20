@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://learning-resources.com",
+    url: "https://learning.stanho.dev",
     siteName: "Learning Resources",
     title: "Learning Resources",
     description: "Your gateway to concise, high-level overviews of technical topics.",
